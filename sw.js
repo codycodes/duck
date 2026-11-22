@@ -1,7 +1,7 @@
 // Minimal offline cache so the installed app opens without a network.
-const CACHE = 'duck-v1';
+const CACHE = 'duck-v2';
 const ASSETS = [
-  './', 'index.html', 'manifest.webmanifest',
+  './', 'index.html', 'manifest.webmanifest', 'replacements.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
 ];
 
