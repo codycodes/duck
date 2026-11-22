@@ -21,13 +21,14 @@
   <style>
     :root { --sky: #4fb3e8; --water: #2e8bc0; --duck: #ffd23f; --ink: #10324a; }
     * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
+    html, body { margin: 0; min-height: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", system-ui, sans-serif;
       background: linear-gradient(var(--sky) 60%, var(--water) 60%);
       color: var(--ink);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+      display: flex; flex-direction: column; align-items: center;
+      padding: calc(env(safe-area-inset-top) + 40px) 16px calc(env(safe-area-inset-bottom) + 40px);
+      background-attachment: fixed;
       text-align: center; -webkit-user-select: none; user-select: none;
     }
     h1 { margin: 0 0 4px; font-size: 2.5rem; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.15); }
@@ -45,6 +46,39 @@
     }
     .count { font-size: 1.6rem; font-weight: 700; }
     .mode { margin-top: 6px; font-size: .8rem; opacity: .7; }
+
+    /* Text replacements */
+    #tr { max-width: 560px; text-align: left; -webkit-user-select: text; user-select: text; }
+    #tr h2 { margin: 0 0 6px; font-size: 1.15rem; }
+    #tr .hint { font-size: .85rem; opacity: .75; margin: 0 0 10px; color: inherit; }
+    #tr .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    #tr button.pick, #tr button.clear {
+      font: inherit; border: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+      background: var(--water); color: #fff;
+    }
+    #tr button.clear { background: #d9e6ef; color: var(--ink); }
+    #tr input[type=search] {
+      flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border-radius: 10px;
+      border: 1px solid #c5d6e2; margin-top: 10px; width: 100%;
+    }
+    #tr .status { font-size: .85rem; margin-top: 8px; }
+    #tr .status.err { color: #b3261e; }
+    #tr table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .9rem; table-layout: fixed; }
+    #tr th, #tr td { padding: 6px 4px; border-bottom: 1px solid #e1eaf0; vertical-align: top; overflow-wrap: anywhere; }
+    #tr th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; opacity: .6; }
+    #tr th:first-child { width: 35%; }
+    #tr td code { background: #eef4f8; padding: 1px 5px; border-radius: 5px; }
+    #tr tbody tr { cursor: copy; }
+    #tr tbody tr:hover { background: #f3f8fb; }
+    #tr [hidden] { display: none; }
+
+    /* Full-window drop target */
+    #dropzone {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      background: rgba(16, 50, 74, .65); color: #fff; font-size: 1.4rem; font-weight: 700;
+      border: 4px dashed #fff; border-radius: 20px; margin: 12px; z-index: 10; pointer-events: none;
+    }
+    body.dragging #dropzone { display: flex; }
   </style>
 </head>
 <body>
@@ -56,6 +90,24 @@
     <div class="count"><span id="count">0</span> quacks</div>
     <div class="mode" id="mode"></div>
   </div>
+
+  <section class="card" id="tr">
+    <h2>Text Replacements</h2>
+    <p class="hint">Drop a <code>.plist</code> on this window or the app icon. To export one on a Mac, open System Settings → Keyboard → Text Replacements, select entries, and drag them to the Desktop.</p>
+    <div class="row">
+      <button class="pick" id="tr-pick" type="button">Choose .plist…</button>
+      <button class="clear" id="tr-clear" type="button" hidden>Clear</button>
+      <input type="file" id="tr-file" accept=".plist,application/x-plist,application/xml,text/xml" hidden>
+    </div>
+    <div class="status" id="tr-status"></div>
+    <input type="search" id="tr-search" placeholder="Filter shortcuts or phrases" hidden>
+    <table id="tr-table" hidden>
+      <thead><tr><th>Shortcut</th><th>Phrase</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <div id="dropzone">Drop .plist to load text replacements</div>
 
   <script>
     const KEY = 'duck-quacks';
@@ -93,5 +145,6 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
   </script>
+  <script src="replacements.js"></script>
 </body>
 </html>
